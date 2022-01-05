@@ -1,6 +1,11 @@
 #!/bin/bash -ux
 
+read -p "Enable controller. Enter 'y' or 'n'. More info at https://aka.ms/ciem-enable-controller: " MCIEM_GCP_ENABLE_CONTROLLER
+export MCIEM_GCP_ENABLE_CONTROLLER=${MCIEM_GCP_ENABLE_CONTROLLER:-n}
+
 export GCP_OIDC_PROJECT_ID=$(gcloud projects list --filter="PROJECT_NUMBER=$GCP_OIDC_PROJECT_NUMBER" --format="value(projectId)")
+
+echo Adding permissions to projects $GCP_COLLECTION_PROJECT_IDS and set controller flag to $MCIEM_GCP_ENABLE_CONTROLLER
 
 for GCP_COLLECTION_PROJECT_ID in $(echo $GCP_COLLECTION_PROJECT_IDS | tr "," "\n"); do
 
@@ -19,7 +24,7 @@ for GCP_COLLECTION_PROJECT_ID in $(echo $GCP_COLLECTION_PROJECT_IDS | tr "," "\n
     --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
     --role="roles/viewer"
 
-  if [ "$MCIEM_GCP_ENABLE_CONTROLLER" == 1 ];
+  if [ $MCIEM_GCP_ENABLE_CONTROLLER = 'y' ];
   then
     echo Enabling controller for account $GCP_COLLECTION_PROJECT_ID
     echo Add IAM roles/iam.securityAdmin policy binding for iam.securityAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
