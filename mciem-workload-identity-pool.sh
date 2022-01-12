@@ -3,6 +3,8 @@
 export GCP_OIDC_PROJECT_NAME=$(gcloud projects list --filter="PROJECT_NUMBER=$GCP_OIDC_PROJECT_NUMBER" --format="value(projectName)")
 export GCP_OIDC_PROJECT_ID=$(gcloud projects list --filter="PROJECT_NUMBER=$GCP_OIDC_PROJECT_NUMBER" --format="value(projectId)")
 
+gcloud config set project $GCP_OIDC_PROJECT_ID
+
 echo In project name:$GCP_OIDC_PROJECT_NAME number:$GCP_OIDC_PROJECT_NUMBER id:$GCP_OIDC_PROJECT_ID
 
 echo Create workload identity pool ${GCP_OIDC_WIP_ID}

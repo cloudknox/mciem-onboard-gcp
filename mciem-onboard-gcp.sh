@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -ux
 
 export OIDC_POOL_NAME=replace_oidc_pool_name
 export OIDC_PROVIDER_NAME=replace_oidc_pool_name
