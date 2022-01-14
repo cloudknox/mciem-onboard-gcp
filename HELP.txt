@@ -17,11 +17,11 @@
 
 
 
-Welcome to CIEM GCP Onboarding!
+Welcome to CloudKnox Permission Management (CIEM) GCP Onboarding!
 
 Steps to onboard a GCP project:
 
-1. Paste the environment vars from the MCIEM CloudKnox portal
+1. Paste the environment vars from the CIEM portal
 2. Execute the following command:
     gcloud auth login
 3. Execute the script to create the provider: 
