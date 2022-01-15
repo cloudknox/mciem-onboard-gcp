@@ -19,7 +19,7 @@ gcloud iam workload-identity-pools providers \
   create-oidc ${GCP_OIDC_WIP_PROVIDER_ID} \
   --location=global \
   --description="ms-ciem-workload-identity-pool-provider" \
-  --display-name="ms-ciem-workload-identity-pool-provider"
+  --display-name="ms-ciem-workload-identity-pool-provider" \
   --workload-identity-pool="${GCP_OIDC_WIP_ID}" \
   --issuer-uri="https://${AZURE_AUTHORITY_URL}/${AZURE_TENANT_ID}/" \
   --allowed-audiences="api://mciem-gcp-oidc-app" \
