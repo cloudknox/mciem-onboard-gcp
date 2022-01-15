@@ -23,7 +23,6 @@ gcloud iam workload-identity-pools providers \
   --workload-identity-pool="${GCP_OIDC_WIP_ID}" \
   --issuer-uri="https://${AZURE_AUTHORITY_URL}/${AZURE_TENANT_ID}/" \
   --allowed-audiences="api://mciem-gcp-oidc-app" \
-  --attribute-condition="attribute.appid==\"${AZURE_APP_ID}\"" \
   --attribute-mapping="google.subject=assertion.sub, attribute.tid=assertion.tid"
 
 
