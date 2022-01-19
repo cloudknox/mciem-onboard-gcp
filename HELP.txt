@@ -28,4 +28,6 @@ Steps to onboard a GCP project:
     sh mciem-workload-identity-pool.sh
 4. Execute the script to onboard the projects: 
     sh mciem-member-projects.sh
+4. Optionally, enable all the recommended GCP APIs: 
+    sh mciem-enable-gcp-api.sh
 

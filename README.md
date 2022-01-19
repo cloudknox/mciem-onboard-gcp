@@ -37,3 +37,8 @@ Steps to onboard a GCP project:
      ``` 
      sh mciem-member-projects.sh 
      ```
+  
+  1. Optionally, enable all the recommended GCP APIs:
+     ``` 
+     sh mciem-enable-gcp-api.sh
+     ```
