@@ -6,7 +6,6 @@ export MCIEM_GCP_ENABLE_CONTROLLER=${MCIEM_GCP_ENABLE_CONTROLLER:-n}
 export GCP_OIDC_PROJECT_ID=$(gcloud projects list --filter="PROJECT_NUMBER=$GCP_OIDC_PROJECT_NUMBER" --format="value(projectId)")
 
 echo Adding permissions to projects $GCP_COLLECTION_PROJECT_IDS and set controller flag to $MCIEM_GCP_ENABLE_CONTROLLER
-
 for GCP_COLLECTION_PROJECT_ID in $(echo $GCP_COLLECTION_PROJECT_IDS | tr "," "\n"); do
 
   export GCP_COLLECTION_PROJECT_NAME=$(gcloud projects list --filter="projectId=$GCP_COLLECTION_PROJECT_ID" --format="value(projectName)")

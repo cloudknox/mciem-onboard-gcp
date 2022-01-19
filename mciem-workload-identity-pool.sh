@@ -7,6 +7,11 @@ gcloud config set project $GCP_OIDC_PROJECT_ID
 
 echo In project name:$GCP_OIDC_PROJECT_NAME number:$GCP_OIDC_PROJECT_NUMBER id:$GCP_OIDC_PROJECT_ID
 
+echo Enabling IAM API in project $GCP_OIDC_PROJECT_ID
+gcloud services enable iam.googleapis.com
+
+echo Enabling IAM Credential API in project $GCP_OIDC_PROJECT_ID
+gcloud services enable iamcredentials.googleapis.com
 echo Create workload identity pool ${GCP_OIDC_WIP_ID}
 gcloud iam workload-identity-pools \
   create ${GCP_OIDC_WIP_ID} \
@@ -18,8 +23,8 @@ echo Create workload identity pool provider ${GCP_OIDC_WIP_PROVIDER_ID}
 gcloud iam workload-identity-pools providers \
   create-oidc ${GCP_OIDC_WIP_PROVIDER_ID} \
   --location=global \
-  --description="ms-ciem-workload-identity-pool-provider" \
-  --display-name="ms-ciem-workload-identity-pool-provider"
+  --description="ms-ciem-wip-provider" \
+  --display-name="ms-ciem-wip-provider" \
   --workload-identity-pool="${GCP_OIDC_WIP_ID}" \
   --issuer-uri="https://${AZURE_AUTHORITY_URL}/${AZURE_TENANT_ID}/" \
   --allowed-audiences="api://mciem-gcp-oidc-app" \
