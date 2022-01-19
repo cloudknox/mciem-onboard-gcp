@@ -12,6 +12,7 @@ gcloud services enable iam.googleapis.com
 
 echo Enabling IAM Credential API in project $GCP_OIDC_PROJECT_ID
 gcloud services enable iamcredentials.googleapis.com
+
 echo Create workload identity pool ${GCP_OIDC_WIP_ID}
 gcloud iam workload-identity-pools \
   create ${GCP_OIDC_WIP_ID} \
