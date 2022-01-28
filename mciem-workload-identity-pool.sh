@@ -30,7 +30,7 @@ gcloud iam workload-identity-pools providers \
   --issuer-uri="https://${AZURE_AUTHORITY_URL}/${AZURE_TENANT_ID}/" \
   --allowed-audiences="api://mciem-gcp-oidc-app" \
   --attribute-condition="attribute.appid==\"${AZURE_APP_ID}\"" \
-  --attribute-mapping="google.subject=assertion.sub, attribute.tid=assertion.tid"
+  --attribute-mapping="google.subject=assertion.sub, attribute.tid=assertion.tid, attribute.appid=assertion.appid"
 
 
 echo Create IAM service account ${GCP_OIDC_SERVICE_ACCOUNT_NAME}
