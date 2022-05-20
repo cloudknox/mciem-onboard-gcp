@@ -1,5 +1,6 @@
 #!/bin/bash -ux
 
+
 read -p "Enable controller. Enter 'y' or 'n'. More info at https://aka.ms/ciem-enable-controller: " MCIEM_GCP_ENABLE_CONTROLLER
 export MCIEM_GCP_ENABLE_CONTROLLER=${MCIEM_GCP_ENABLE_CONTROLLER:-n}
 
@@ -36,4 +37,61 @@ for GCP_COLLECTION_PROJECT_ID in $(echo $GCP_COLLECTION_PROJECT_IDS | tr "," "\n
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
       --role="roles/iam.roleAdmin"
   fi  
+done
+
+echo Adding permissions to folders $GCP_COLLECTION_FOLDER_IDS and set controller flag to $MCIEM_GCP_ENABLE_CONTROLLER
+for GCP_COLLECTION_FOLDER_ID in $(echo $GCP_COLLECTION_FOLDER_IDS | tr "," "\n"); do
+  echo Add IAM roles/iam.securityReviewer policy binding for iam.securityReviewer to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_FOLDER_ID}.iam.gserviceaccount.com
+  gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_FOLDER_ID} \
+      --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
+      --role="roles/iam.securityAdmin"
+
+  echo Add IAM roles/iam.roleAdmin policy binding for iam.roleAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+  gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_FOLDER_ID} \
+    --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/iam.roleAdmin"
+
+  if [ $MCIEM_GCP_ENABLE_CONTROLLER = 'y' ];
+  then
+    echo Enabling controller for folder $GCP_COLLECTION_FOLDER_ID
+    echo Add IAM roles/iam.securityAdmin policy binding for iam.securityAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+    gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_FOLDER_ID} \
+      --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
+      --role="roles/iam.securityAdmin"
+    
+    echo Add IAM roles/iam.roleAdmin policy binding for iam.roleAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+    gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_FOLDER_ID} \
+      --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
+      --role="roles/iam.roleAdmin"
+  fi  
+
+done
+
+
+echo Adding permissions to folders $GCP_COLLECTION_ORG_IDS and set controller flag to $MCIEM_GCP_ENABLE_CONTROLLER
+for GCP_COLLECTION_ORG_ID in $(echo $GCP_COLLECTION_ORG_IDS | tr "," "\n"); do
+  echo Add IAM roles/iam.securityReviewer policy binding for iam.securityReviewer to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_ORG_ID}.iam.gserviceaccount.com
+  gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
+      --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
+      --role="roles/iam.securityAdmin"
+
+  echo Add IAM roles/iam.roleAdmin policy binding for iam.roleAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+  gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
+    --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/iam.roleAdmin"
+
+  if [ $MCIEM_GCP_ENABLE_CONTROLLER = 'y' ];
+  then
+    echo Enabling controller for folder $GCP_COLLECTION_ORG_ID
+    echo Add IAM roles/iam.securityAdmin policy binding for iam.securityAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+    gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
+      --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
+      --role="roles/iam.securityAdmin"
+    
+    echo Add IAM roles/iam.roleAdmin policy binding for iam.roleAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+    gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
+      --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
+      --role="roles/iam.roleAdmin"
+  fi  
+
 done
