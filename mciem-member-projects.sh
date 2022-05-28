@@ -1,8 +1,28 @@
 #!/bin/bash -ux
 
+if [ -z "$GCP_COLLECTION_ORG_ID" ] && [ -z "$GCP_COLLECTION_FOLDER_IDS" ] && [ -z "$GCP_COLLECTION_PROJECT_IDS" ]; then
+  echo "You have to set either GCP_COLLECTION_ORG_ID, GCP_COLLECTION_FOLDER_IDS or GCP_COLLECTION_PROJECT_IDS"
+  exit 1
+fi
 
 read -p "Enable controller. Enter 'y' or 'n'. More info at https://aka.ms/ciem-enable-controller: " MCIEM_GCP_ENABLE_CONTROLLER
 export MCIEM_GCP_ENABLE_CONTROLLER=${MCIEM_GCP_ENABLE_CONTROLLER:-n}
+
+if [ $MCIEM_GCP_ENABLE_CONTROLLER = 'y' ] ; then
+  if [ ! -z "$GCP_COLLECTION_ORG_ID" ] || [ ! -z "$GCP_COLLECTION_FOLDER_IDS" ] ; then
+    if [ -z "$GCP_COLLECTION_ORG_ID" ]; then
+      echo "You have to set GCP_COLLECTION_ORG_ID"
+      exit 1
+    fi
+
+    FILE=./cloudknox-iam-org-admin.yaml
+    if [ -f "$FILE" ]; then
+      echo "$FILE exists."
+    fi
+    echo "Creating CloudKnoxIAMOrgAdmin Custom Role"
+    gcloud iam roles create CloudKnoxIAMOrgAdmin --organization=${GCP_COLLECTION_ORG_ID} --file=$FILE
+  fi
+fi
 
 export GCP_OIDC_PROJECT_ID=$(gcloud projects list --filter="PROJECT_NUMBER=$GCP_OIDC_PROJECT_NUMBER" --format="value(projectId)")
 
@@ -14,12 +34,12 @@ for GCP_COLLECTION_PROJECT_ID in $(echo $GCP_COLLECTION_PROJECT_IDS | tr "," "\n
 
   echo Working on project name:$GCP_COLLECTION_PROJECT_NAME number:$GCP_COLLECTION_PROJECT_NUMBER id:$GCP_COLLECTION_PROJECT_ID
 
-  echo Add IAM roles/iam.securityReviewer policy binding for iam.securityReviewer to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+  echo Adding IAM policy binding iam.securityReviewer to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
   gcloud projects add-iam-policy-binding ${GCP_COLLECTION_PROJECT_ID} \
     --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
     --role="roles/iam.securityReviewer"
 
-  echo Add Viewer Role roles/viewer policy binding for viewer to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+  echo Adding Viewer Role to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
   gcloud projects add-iam-policy-binding ${GCP_COLLECTION_PROJECT_ID} \
     --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
     --role="roles/viewer"
@@ -27,71 +47,69 @@ for GCP_COLLECTION_PROJECT_ID in $(echo $GCP_COLLECTION_PROJECT_IDS | tr "," "\n
   if [ $MCIEM_GCP_ENABLE_CONTROLLER = 'y' ];
   then
     echo Enabling controller for account $GCP_COLLECTION_PROJECT_ID
-    echo Add IAM roles/iam.securityAdmin policy binding for iam.securityAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+    echo Adding IAM policy binding iam.securityAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
     gcloud projects add-iam-policy-binding ${GCP_COLLECTION_PROJECT_ID} \
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
       --role="roles/iam.securityAdmin"
     
-    echo Add IAM roles/iam.roleAdmin policy binding for iam.roleAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+    echo Adding IAM policy binding iam.roleAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
     gcloud projects add-iam-policy-binding ${GCP_COLLECTION_PROJECT_ID} \
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
       --role="roles/iam.roleAdmin"
   fi  
 done
 
-echo Adding permissions to folders $GCP_COLLECTION_FOLDER_IDS and set controller flag to $MCIEM_GCP_ENABLE_CONTROLLER
+echo Addinging permissions to folders $GCP_COLLECTION_FOLDER_IDS and set controller flag to $MCIEM_GCP_ENABLE_CONTROLLER
 for GCP_COLLECTION_FOLDER_ID in $(echo $GCP_COLLECTION_FOLDER_IDS | tr "," "\n"); do
-  echo Add IAM roles/iam.securityReviewer policy binding for iam.securityReviewer to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_FOLDER_ID}.iam.gserviceaccount.com
+  echo Adding IAM policy binding iam.securityReviewer to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_FOLDER_ID}.iam.gserviceaccount.com
   gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_FOLDER_ID} \
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
       --role="roles/iam.securityAdmin"
 
-  echo Add IAM roles/iam.roleAdmin policy binding for iam.roleAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+  echo Adding Viewer Role to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
   gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_FOLDER_ID} \
     --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
-    --role="roles/iam.roleAdmin"
+    --role="roles/viewer"
 
   if [ $MCIEM_GCP_ENABLE_CONTROLLER = 'y' ];
   then
     echo Enabling controller for folder $GCP_COLLECTION_FOLDER_ID
-    echo Add IAM roles/iam.securityAdmin policy binding for iam.securityAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+    echo Adding IAM policy binding iam.securityAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
     gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_FOLDER_ID} \
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
       --role="roles/iam.securityAdmin"
     
-    echo Add IAM roles/iam.roleAdmin policy binding for iam.roleAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+    echo Adding IAM policy binding iam.roleAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
     gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_FOLDER_ID} \
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
-      --role="roles/iam.roleAdmin"
+      --role="organizations/${GCP_COLLECTION_ORG_ID}/roles/CloudKnoxIAMOrgAdmin"
   fi  
 
 done
 
-
-echo Adding permissions to folders $GCP_COLLECTION_ORG_IDS and set controller flag to $MCIEM_GCP_ENABLE_CONTROLLER
-for GCP_COLLECTION_ORG_ID in $(echo $GCP_COLLECTION_ORG_IDS | tr "," "\n"); do
-  echo Add IAM roles/iam.securityReviewer policy binding for iam.securityReviewer to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_ORG_ID}.iam.gserviceaccount.com
-  gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
+echo Adding permissions to org $GCP_COLLECTION_ORG_ID and set controller flag to $MCIEM_GCP_ENABLE_CONTROLLER
+if  [ ! -z "$GCP_COLLECTION_ORG_ID" ]; then 
+  echo Adding IAM policy binding iam.securityReviewer to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_ORG_ID}.iam.gserviceaccount.com
+  gcloud organizations add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
       --role="roles/iam.securityAdmin"
 
-  echo Add IAM roles/iam.roleAdmin policy binding for iam.roleAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
-  gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
+  echo Adding Viewer Role to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+  gcloud organizations add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
     --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
-    --role="roles/iam.roleAdmin"
+    --role="roles/viewer"
 
   if [ $MCIEM_GCP_ENABLE_CONTROLLER = 'y' ];
   then
     echo Enabling controller for folder $GCP_COLLECTION_ORG_ID
-    echo Add IAM roles/iam.securityAdmin policy binding for iam.securityAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
-    gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
+    echo Adding IAM policy binding iam.securityAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+    gcloud organizations add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
       --role="roles/iam.securityAdmin"
     
-    echo Add IAM roles/iam.roleAdmin policy binding for iam.roleAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
-    gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
+    echo Adding IAM policy binding iam.roleAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+    gcloud organizations add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
-      --role="roles/iam.roleAdmin"
-  fi  
-
-done
+      --role="organizations/${GCP_COLLECTION_ORG_ID}/roles/CloudKnoxIAMOrgAdmin"
+  fi
+fi
