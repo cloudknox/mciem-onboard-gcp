@@ -64,7 +64,7 @@ for GCP_COLLECTION_FOLDER_ID in $(echo $GCP_COLLECTION_FOLDER_IDS | tr "," "\n")
   echo Adding IAM policy binding iam.securityReviewer to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_FOLDER_ID}.iam.gserviceaccount.com
   gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_FOLDER_ID} \
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
-      --role="roles/iam.securityAdmin"
+      --role="roles/iam.securityReviewer"
 
   echo Adding Viewer Role to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
   gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_FOLDER_ID} \
@@ -92,7 +92,7 @@ if  [ ! -z "$GCP_COLLECTION_ORG_ID" ]; then
   echo Adding IAM policy binding iam.securityReviewer to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_ORG_ID}.iam.gserviceaccount.com
   gcloud organizations add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
-      --role="roles/iam.securityAdmin"
+      --role="roles/iam.securityReviewer"
 
   echo Adding Viewer Role to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
   gcloud organizations add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
