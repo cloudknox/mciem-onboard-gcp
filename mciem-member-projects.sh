@@ -16,8 +16,9 @@ if [ $MCIEM_GCP_ENABLE_CONTROLLER = 'y' ] ; then
     fi
 
     FILE=./cloudknox-iam-org-admin.yaml
-    if [ -f "$FILE" ]; then
-      echo "$FILE exists."
+    if [ ! -f "$FILE" ]; then
+      echo "$FILE do not exists."
+      exit 1
     fi
     echo "Creating CloudKnoxIAMOrgAdmin Custom Role"
     gcloud iam roles create CloudKnoxIAMOrgAdmin --organization=${GCP_COLLECTION_ORG_ID} --file=$FILE
