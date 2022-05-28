@@ -1,5 +1,7 @@
 #!/bin/bash -ux
-export MCIEM_CUSTOM_ROLE_NAME=CloudKnoxIAMOrgAdmin-$(date +%s)
+
+EPOCH=$(date +%s)
+export MCIEM_CUSTOM_ROLE_NAME=CloudKnoxIAMOrgAdmin_${EPOCH}
 
 if [ -z "$GCP_COLLECTION_ORG_ID" ] && [ -z "$GCP_COLLECTION_FOLDER_IDS" ] && [ -z "$GCP_COLLECTION_PROJECT_IDS" ]; then
   echo "You have to set either GCP_COLLECTION_ORG_ID, GCP_COLLECTION_FOLDER_IDS or GCP_COLLECTION_PROJECT_IDS"
