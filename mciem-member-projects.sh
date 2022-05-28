@@ -1,4 +1,5 @@
 #!/bin/bash -ux
+export MCIEM_CUSTOM_ROLE_NAME=CloudKnoxIAMOrgAdmin
 
 if [ -z "$GCP_COLLECTION_ORG_ID" ] && [ -z "$GCP_COLLECTION_FOLDER_IDS" ] && [ -z "$GCP_COLLECTION_PROJECT_IDS" ]; then
   echo "You have to set either GCP_COLLECTION_ORG_ID, GCP_COLLECTION_FOLDER_IDS or GCP_COLLECTION_PROJECT_IDS"
@@ -20,8 +21,12 @@ if [ $MCIEM_GCP_ENABLE_CONTROLLER = 'y' ] ; then
       echo "$FILE do not exists."
       exit 1
     fi
-    echo "Creating CloudKnoxIAMOrgAdmin Custom Role"
-    gcloud iam roles create CloudKnoxIAMOrgAdmin --organization=${GCP_COLLECTION_ORG_ID} --file=$FILE
+
+    read -p "Enter Custom Role Name. Default CloudKnoxIAMOrgAdmin. More info at https://aka.ms/ciem-enable-controller: " MCIEM_CUSTOM_ROLE_NAME
+    export MCIEM_CUSTOM_ROLE_NAME=${MCIEM_CUSTOM_ROLE_NAME:-CloudKnoxIAMOrgAdmin}
+
+    echo "Creating ${MCIEM_CUSTOM_ROLE_NAME} Custom Role"
+    gcloud iam roles create ${MCIEM_CUSTOM_ROLE_NAME} --organization=${GCP_COLLECTION_ORG_ID} --file=$FILE
   fi
 fi
 
@@ -80,10 +85,10 @@ for GCP_COLLECTION_FOLDER_ID in $(echo $GCP_COLLECTION_FOLDER_IDS | tr "," "\n")
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
       --role="roles/iam.securityAdmin"
     
-    echo Adding IAM policy binding CloudKnoxIAMOrgAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+    echo Adding IAM policy binding ${MCIEM_CUSTOM_ROLE_NAME} to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
     gcloud resource-manager folders add-iam-policy-binding ${GCP_COLLECTION_FOLDER_ID} \
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
-      --role="organizations/${GCP_COLLECTION_ORG_ID}/roles/CloudKnoxIAMOrgAdmin"
+      --role="organizations/${GCP_COLLECTION_ORG_ID}/roles/${MCIEM_CUSTOM_ROLE_NAME}"
   fi  
 
 done
@@ -116,9 +121,9 @@ if  [ ! -z "$GCP_COLLECTION_ORG_ID" ]; then
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
       --role="roles/iam.securityAdmin"
     
-    echo Adding IAM policy binding CloudKnoxIAMOrgAdmin to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
+    echo Adding IAM policy binding ${MCIEM_CUSTOM_ROLE_NAME} to ${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com 
     gcloud organizations add-iam-policy-binding ${GCP_COLLECTION_ORG_ID} \
       --member="serviceAccount:${GCP_OIDC_SERVICE_ACCOUNT_NAME}@${GCP_OIDC_PROJECT_ID}.iam.gserviceaccount.com" \
-      --role="organizations/${GCP_COLLECTION_ORG_ID}/roles/CloudKnoxIAMOrgAdmin"
+      --role="organizations/${GCP_COLLECTION_ORG_ID}/roles/${MCIEM_CUSTOM_ROLE_NAME}"
   fi
 fi
