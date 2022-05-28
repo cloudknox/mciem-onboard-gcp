@@ -1,5 +1,5 @@
 #!/bin/bash -ux
-export MCIEM_CUSTOM_ROLE_NAME=CloudKnoxIAMOrgAdmin
+export MCIEM_CUSTOM_ROLE_NAME=CloudKnoxIAMOrgAdmin-$(date +%s)
 
 if [ -z "$GCP_COLLECTION_ORG_ID" ] && [ -z "$GCP_COLLECTION_FOLDER_IDS" ] && [ -z "$GCP_COLLECTION_PROJECT_IDS" ]; then
   echo "You have to set either GCP_COLLECTION_ORG_ID, GCP_COLLECTION_FOLDER_IDS or GCP_COLLECTION_PROJECT_IDS"
@@ -21,9 +21,6 @@ if [ $MCIEM_GCP_ENABLE_CONTROLLER = 'y' ] ; then
       echo "$FILE do not exists."
       exit 1
     fi
-
-    read -p "Enter Custom Role Name. Default CloudKnoxIAMOrgAdmin. More info at https://aka.ms/ciem-enable-controller: " MCIEM_CUSTOM_ROLE_NAME
-    export MCIEM_CUSTOM_ROLE_NAME=${MCIEM_CUSTOM_ROLE_NAME:-CloudKnoxIAMOrgAdmin}
 
     echo "Creating ${MCIEM_CUSTOM_ROLE_NAME} Custom Role"
     gcloud iam roles create ${MCIEM_CUSTOM_ROLE_NAME} --organization=${GCP_COLLECTION_ORG_ID} --file=$FILE
